@@ -1,0 +1,58 @@
+package com.financedomain.user.controller;
+
+import com.financedomain.user.bean.Client;
+import com.financedomain.user.dto.ClientRequest;
+import com.financedomain.user.service.ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users/client")
+public class ClientController {
+
+    @Autowired
+    private ClientService clientService;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> createClient(@RequestBody ClientRequest request) {
+        try {
+            Client client = clientService.createClient(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(client);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<Client>> getAllClients() {
+        return ResponseEntity.ok(clientService.getAllClients());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getClientById(@PathVariable Long id) {
+        return clientService.getClientById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/number/{number}")
+    public ResponseEntity<?> getClientByNumber(@PathVariable String number) {
+        return clientService.getClientByNumber(number)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteClient(@PathVariable Long id) {
+        try {
+            clientService.deleteClient(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+}
