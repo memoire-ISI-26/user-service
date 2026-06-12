@@ -5,6 +5,7 @@ import com.financedomain.user.dto.ClientRequest;
 import com.financedomain.user.enums.TypeRole;
 import com.financedomain.user.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,9 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public Client createClient(ClientRequest request) {
         if (clientRepository.existsByNumber(request.getNumber())) {
             throw new IllegalArgumentException("Le numéro de téléphone '" + request.getNumber() + "' est déjà utilisé.");
@@ -24,7 +28,7 @@ public class ClientService {
         Client client = new Client();
         client.setFirstName(request.getFirstName());
         client.setLastName(request.getLastName());
-        client.setPassword(request.getPassword());
+        client.setPassword(passwordEncoder.encode(request.getPassword()));
         client.setNumber(request.getNumber());
         client.setBirthdate(request.getBirthdate());
         client.setRole(TypeRole.CLIENT);

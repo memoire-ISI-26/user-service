@@ -5,6 +5,7 @@ import com.financedomain.user.dto.AdminRequest;
 import com.financedomain.user.enums.TypeRole;
 import com.financedomain.user.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,9 @@ public class AdminService {
     @Autowired
     private AdminRepository adminRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public Admin createAdmin(AdminRequest request) {
         if (adminRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("L'identifiant '" + request.getUsername() + "' est déjà utilisé.");
@@ -24,7 +28,7 @@ public class AdminService {
         Admin admin = new Admin();
         admin.setFirstName(request.getFirstName());
         admin.setLastName(request.getLastName());
-        admin.setPassword(request.getPassword());
+        admin.setPassword(passwordEncoder.encode(request.getPassword()));
         admin.setUsername(request.getUsername());
         admin.setRole(TypeRole.ADMINISTRATOR);
 
