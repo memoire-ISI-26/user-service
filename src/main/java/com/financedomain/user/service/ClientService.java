@@ -1,8 +1,10 @@
 package com.financedomain.user.service;
 
 import com.financedomain.user.bean.Client;
+import com.financedomain.user.dto.AccountCreationRequest;
 import com.financedomain.user.dto.ClientRequest;
 import com.financedomain.user.enums.TypeRole;
+import com.financedomain.user.proxy.WalletProxy;
 import com.financedomain.user.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,9 @@ public class ClientService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private WalletProxy walletProxy;
+
     public Client createClient(ClientRequest request) {
         if (clientRepository.existsByNumber(request.getNumber())) {
             throw new IllegalArgumentException("Le numéro de téléphone '" + request.getNumber() + "' est déjà utilisé.");
@@ -33,7 +38,19 @@ public class ClientService {
         client.setBirthdate(request.getBirthdate());
         client.setRole(TypeRole.CLIENT);
 
-        return clientRepository.save(client);
+        Client savedClient = clientRepository.save(client);
+
+        try {
+            walletProxy.createAccount(new AccountCreationRequest(
+                    savedClient.getId(),
+                    savedClient.getNumber(),
+                    "XOF"
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException("Échec de la création du compte portefeuille associé dans wallet-service : " + e.getMessage(), e);
+        }
+
+        return savedClient;
     }
 
     public List<Client> getAllClients() {
