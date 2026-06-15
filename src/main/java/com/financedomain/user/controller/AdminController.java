@@ -2,6 +2,8 @@ package com.financedomain.user.controller;
 
 import com.financedomain.user.bean.Admin;
 import com.financedomain.user.dto.AdminRequest;
+import com.financedomain.user.exception.BadCreationFormatException;
+import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class AdminController {
         try {
             Admin admin = adminService.createAdmin(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(admin);
-        } catch (IllegalArgumentException e) {
+        } catch (BadCreationFormatException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
@@ -51,7 +53,7 @@ public class AdminController {
         try {
             adminService.deleteAdmin(id);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (NullUserDataException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }

@@ -2,6 +2,8 @@ package com.financedomain.user.controller;
 
 import com.financedomain.user.bean.Client;
 import com.financedomain.user.dto.ClientRequest;
+import com.financedomain.user.exception.BadCreationFormatException;
+import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class ClientController {
         try {
             Client client = clientService.createClient(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(client);
-        } catch (IllegalArgumentException e) {
+        } catch (BadCreationFormatException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
@@ -51,7 +53,7 @@ public class ClientController {
         try {
             clientService.deleteClient(id);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (NullUserDataException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
