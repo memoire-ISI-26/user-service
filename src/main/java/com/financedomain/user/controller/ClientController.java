@@ -30,26 +30,66 @@ public class ClientController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<Client>> getAllClients() {
+    public ResponseEntity<?> getAllClients(
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        if (!"ADMIN".equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        }
         return ResponseEntity.ok(clientService.getAllClients());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getClientById(@PathVariable Long id) {
+    public ResponseEntity<?> getClientById(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        if ("CLIENT".equals(xUserRole) && !String.valueOf(id).equals(xUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        }
         return clientService.getClientById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/number/{number}")
-    public ResponseEntity<?> getClientByNumber(@PathVariable String number) {
+    public ResponseEntity<?> getClientByNumber(
+            @PathVariable String number,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        // INTERNAL role is used by authentication-service Feign calls during login
+        if (!"INTERNAL".equals(xUserRole) && "CLIENT".equals(xUserRole) && !number.equals(xUserPhone)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        }
         return clientService.getClientByNumber(number)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteClient(@PathVariable Long id) {
+    public ResponseEntity<?> deleteClient(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        if ("CLIENT".equals(xUserRole) && !String.valueOf(id).equals(xUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        }
         try {
             clientService.deleteClient(id);
             return ResponseEntity.noContent().build();

@@ -3,6 +3,8 @@ package com.financedomain.user.service;
 import com.financedomain.user.bean.Admin;
 import com.financedomain.user.dto.AdminRequest;
 import com.financedomain.user.enums.TypeRole;
+import com.financedomain.user.exception.BadCreationFormatException;
+import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +24,7 @@ public class AdminService {
 
     public Admin createAdmin(AdminRequest request) {
         if (adminRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("L'identifiant '" + request.getUsername() + "' est déjà utilisé.");
+            throw new BadCreationFormatException("L'identifiant '" + request.getUsername() + "' est déjà utilisé.");
         }
 
         Admin admin = new Admin();
@@ -49,7 +51,7 @@ public class AdminService {
 
     public void deleteAdmin(Long id) {
         if (!adminRepository.existsById(id)) {
-            throw new IllegalArgumentException("Administrateur introuvable avec l'id : " + id);
+            throw new NullUserDataException("Administrateur introuvable avec l'id : " + id);
         }
         adminRepository.deleteById(id);
     }
