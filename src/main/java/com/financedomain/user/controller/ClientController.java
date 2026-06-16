@@ -16,11 +16,11 @@ import java.util.List;
 @RequestMapping("/users/client")
 public class ClientController {
 
-    private final static String Unauthorized = "Unauthorized";
-    private final static String AccessDenied = "Access Denied";
-    private final static String CLIENT ="CLIENT";
-    private final static String ADMIN ="ADMIN";
-    private final static String INTERNAL = "INTERNAL";
+    private static final String UNAUTHORIZED = "Unauthorized";
+    private static final String ACCESSDENIED = "Access Denied";
+    private static final String CLIENT ="CLIENT";
+    private static final String ADMIN ="ADMIN";
+    private static final String INTERNAL = "INTERNAL";
 
     @Autowired
     private ClientService clientService;
@@ -41,10 +41,10 @@ public class ClientController {
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
         }
         if (!ADMIN.equals(xUserRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return ResponseEntity.ok(clientService.getAllClients());
     }
@@ -56,10 +56,10 @@ public class ClientController {
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
         }
         if (CLIENT.equals(xUserRole) && !String.valueOf(id).equals(xUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientById(id)
                 .map(ResponseEntity::ok)
@@ -73,11 +73,11 @@ public class ClientController {
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
         }
         // INTERNAL role is used by authentication-service Feign calls during login
         if (!INTERNAL.equals(xUserRole) && CLIENT.equals(xUserRole) && !number.equals(xUserPhone)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientByNumber(number)
                 .map(ResponseEntity::ok)
@@ -91,10 +91,10 @@ public class ClientController {
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
         }
         if (CLIENT.equals(xUserRole) && !String.valueOf(id).equals(xUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         try {
             clientService.deleteClient(id);
