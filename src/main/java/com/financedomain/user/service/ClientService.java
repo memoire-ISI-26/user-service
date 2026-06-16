@@ -4,6 +4,9 @@ import com.financedomain.user.bean.Client;
 import com.financedomain.user.dto.AccountCreationRequest;
 import com.financedomain.user.dto.ClientRequest;
 import com.financedomain.user.enums.TypeRole;
+import com.financedomain.user.exception.AccountAlreadyExistException;
+import com.financedomain.user.exception.BadCreationFormatException;
+import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.proxy.WalletProxy;
 import com.financedomain.user.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,7 @@ public class ClientService {
 
     public Client createClient(ClientRequest request) {
         if (clientRepository.existsByNumber(request.getNumber())) {
-            throw new IllegalArgumentException("Le numéro de téléphone '" + request.getNumber() + "' est déjà utilisé.");
+            throw new AccountAlreadyExistException("Le numéro de téléphone '" + request.getNumber() + "' est déjà utilisé.");
         }
 
         Client client = new Client();
@@ -46,8 +49,8 @@ public class ClientService {
                     savedClient.getNumber(),
                     "XOF"
             ));
-        } catch (Exception e) {
-            throw new RuntimeException("Échec de la création du compte portefeuille associé dans wallet-service : " + e.getMessage(), e);
+        } catch (BadCreationFormatException e) {
+            throw new BadCreationFormatException("Échec de la création du compte portefeuille associé dans wallet-service : " + e.getMessage());
         }
 
         return savedClient;
@@ -67,7 +70,7 @@ public class ClientService {
 
     public void deleteClient(Long id) {
         if (!clientRepository.existsById(id)) {
-            throw new IllegalArgumentException("Client introuvable avec l'id : " + id);
+            throw new NullUserDataException("Client introuvable avec l'id : " + id);
         }
         clientRepository.deleteById(id);
     }
