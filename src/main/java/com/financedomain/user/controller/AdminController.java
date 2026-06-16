@@ -16,6 +16,11 @@ import java.util.List;
 @RequestMapping("/users/admin")
 public class AdminController {
 
+    private final static String Unauthorized = "Unauthorized";
+    private final static String AccessDenied = "Access Denied";
+    private final static String ADMIN ="ADMIN";
+    private final static String INTERNAL = "INTERNAL";
+
     @Autowired
     private AdminService adminService;
 
@@ -33,10 +38,10 @@ public class AdminController {
     public ResponseEntity<?> getAllAdmins(
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
         }
-        if (!"ADMIN".equals(xUserRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        if (!ADMIN.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
         }
         return ResponseEntity.ok(adminService.getAllAdmins());
     }
@@ -46,10 +51,10 @@ public class AdminController {
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
         }
-        if (!"ADMIN".equals(xUserRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        if (!ADMIN.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
         }
         return adminService.getAdminById(id)
                 .map(ResponseEntity::ok)
@@ -61,11 +66,11 @@ public class AdminController {
             @PathVariable String username,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
         }
         // INTERNAL role is used by authentication-service Feign calls during login
-        if (!"ADMIN".equals(xUserRole) && !"INTERNAL".equals(xUserRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        if (!ADMIN.equals(xUserRole) && !INTERNAL.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
         }
         return adminService.getAdminByUsername(username)
                 .map(ResponseEntity::ok)
@@ -77,10 +82,10 @@ public class AdminController {
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Unauthorized);
         }
-        if (!"ADMIN".equals(xUserRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        if (!ADMIN.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AccessDenied);
         }
         try {
             adminService.deleteAdmin(id);
