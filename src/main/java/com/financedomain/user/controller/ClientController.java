@@ -1,11 +1,13 @@
 package com.financedomain.user.controller;
 
 import com.financedomain.user.bean.Client;
+import com.financedomain.user.dto.ApiResponse;
 import com.financedomain.user.dto.ClientRequest;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +20,26 @@ public class ClientController {
 
     private static final String UNAUTHORIZED = "Unauthorized";
     private static final String ACCESSDENIED = "Access Denied";
-    private static final String CLIENT ="CLIENT";
-    private static final String ADMIN ="ADMIN";
+    private static final String CLIENT = "CLIENT";
+    private static final String ADMIN = "ADMIN";
     private static final String INTERNAL = "INTERNAL";
 
     @Autowired
     private ClientService clientService;
 
+    @Autowired
+    private Environment environment;
+
+    private String getPort() {
+        return environment.getProperty("local.server.port", "unknown");
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> createClient(@RequestBody ClientRequest request) {
         try {
             Client client = clientService.createClient(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(client);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(client, getPort()));
         } catch (BadCreationFormatException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Le numméro saisi est déja utilisé" + e.getMessage());
         }
@@ -46,7 +56,8 @@ public class ClientController {
         if (!ADMIN.equals(xUserRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
-        return ResponseEntity.ok(clientService.getAllClients());
+        List<Client> clients = clientService.getAllClients();
+        return ResponseEntity.ok(new ApiResponse<>(clients, getPort()));
     }
 
     @GetMapping("/{id}")
@@ -62,7 +73,7 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientById(id)
-                .map(ResponseEntity::ok)
+                .map(client -> ResponseEntity.ok(new ApiResponse<>(client, getPort())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -80,7 +91,7 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientByNumber(number)
-                .map(ResponseEntity::ok)
+                .map(client -> ResponseEntity.ok(new ApiResponse<>(client, getPort())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
