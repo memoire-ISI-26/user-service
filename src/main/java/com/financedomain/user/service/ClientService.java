@@ -10,6 +10,9 @@ import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.proxy.WalletProxy;
 import com.financedomain.user.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,14 +63,20 @@ public class ClientService {
         return clientRepository.findAll();
     }
 
+    @Cacheable(value = "clients", key = "#id")
     public Optional<Client> getClientById(Long id) {
         return clientRepository.findById(id);
     }
 
+    @Cacheable(value = "clientsByNumber", key = "#number")
     public Optional<Client> getClientByNumber(String number) {
         return clientRepository.findByNumber(number);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "clients", key = "#id"),
+        @CacheEvict(value = "clientsByNumber", allEntries = true)
+    })
     public void deleteClient(Long id) {
         if (!clientRepository.existsById(id)) {
             throw new NullUserDataException("Client introuvable avec l'id : " + id);
