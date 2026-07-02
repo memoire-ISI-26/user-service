@@ -1,13 +1,11 @@
 package com.financedomain.user.controller;
 
-import com.financedomain.user.bean.User;
 import com.financedomain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -16,7 +14,7 @@ public class UserController {
     private static final String UNAUTHORIZED = "Unauthorized";
     private static final String ACCESSDENIED = "Access Denied";
     private static final String CLIENT ="CLIENT";
-    private static final String ADMIN ="ADMIN";
+    private static final String ADMIN ="ADMINISTRATOR";
 
     @Autowired
     private UserRepository userRepository;
