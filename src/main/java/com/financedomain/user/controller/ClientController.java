@@ -3,6 +3,7 @@ package com.financedomain.user.controller;
 import com.financedomain.user.bean.Client;
 import com.financedomain.user.dto.ApiResponse;
 import com.financedomain.user.dto.ClientRequest;
+import com.financedomain.user.dto.PasswordUpdateRequest;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.ClientService;
@@ -21,7 +22,7 @@ public class ClientController {
     private static final String UNAUTHORIZED = "Unauthorized";
     private static final String ACCESSDENIED = "Access Denied";
     private static final String CLIENT = "CLIENT";
-    private static final String ADMIN = "ADMIN";
+    private static final String ADMIN = "ADMINISTRATOR";
     private static final String INTERNAL = "INTERNAL";
 
     @Autowired
@@ -73,7 +74,13 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientById(id)
-                .map(client -> ResponseEntity.ok(new ApiResponse<>(client, getPort())))
+                .map(client -> {
+                    if (INTERNAL.equals(xUserRole)) {
+                        return ResponseEntity.ok(client);
+                    } else {
+                        return ResponseEntity.ok(new ApiResponse<>(client, getPort()));
+                    }
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -86,12 +93,18 @@ public class ClientController {
         if (xUserRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
         }
-        // INTERNAL role is used by authentication-service Feign calls during login
-        if (!INTERNAL.equals(xUserRole) && CLIENT.equals(xUserRole) && !number.equals(xUserPhone)) {
+        // Seuls l'administrateur et les appels internes (auth-service via Feign) sont autorisés
+        if (!ADMIN.equals(xUserRole) && !INTERNAL.equals(xUserRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientByNumber(number)
-                .map(client -> ResponseEntity.ok(new ApiResponse<>(client, getPort())))
+                .map(client -> {
+                    if (INTERNAL.equals(xUserRole)) {
+                        return ResponseEntity.ok(client);
+                    } else {
+                        return ResponseEntity.ok(new ApiResponse<>(client, getPort()));
+                    }
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -112,6 +125,27 @@ public class ClientController {
             return ResponseEntity.noContent().build();
         } catch (NullUserDataException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("L'id client saisi est introuvable ou n'existe pas" + e.getMessage());
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(
+            @RequestBody PasswordUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
+        }
+        if (!CLIENT.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
+        }
+        try {
+            clientService.updatePassword(Long.valueOf(xUserId), request);
+            return ResponseEntity.ok(new ApiResponse<>("Mot de passe modifié avec succès.", getPort()));
+        } catch (NullUserDataException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadCreationFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

@@ -2,6 +2,7 @@ package com.financedomain.user.service;
 
 import com.financedomain.user.bean.Admin;
 import com.financedomain.user.dto.AdminRequest;
+import com.financedomain.user.dto.PasswordUpdateRequest;
 import com.financedomain.user.enums.TypeRole;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
@@ -54,5 +55,17 @@ public class AdminService {
             throw new NullUserDataException("Administrateur introuvable avec l'id : " + id);
         }
         adminRepository.deleteById(id);
+    }
+
+    public void updatePassword(Long id, PasswordUpdateRequest request) {
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new NullUserDataException("Administrateur introuvable avec l'id : " + id));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), admin.getPassword())) {
+            throw new BadCreationFormatException("L'ancien mot de passe est incorrect.");
+        }
+
+        admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        adminRepository.save(admin);
     }
 }

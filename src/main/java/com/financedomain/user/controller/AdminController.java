@@ -2,6 +2,7 @@ package com.financedomain.user.controller;
 
 import com.financedomain.user.bean.Admin;
 import com.financedomain.user.dto.AdminRequest;
+import com.financedomain.user.dto.PasswordUpdateRequest;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.AdminService;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/users/admin")
@@ -18,7 +18,7 @@ public class AdminController {
 
     private static final String UNAUTHORIZED = "Unauthorized";
     private static final String ACCESSDENIED = "Access Denied";
-    private static final String ADMIN ="ADMIN";
+    private static final String ADMIN ="ADMINISTRATOR";
     private static final String INTERNAL = "INTERNAL";
 
     @Autowired
@@ -92,6 +92,27 @@ public class AdminController {
             return ResponseEntity.noContent().build();
         } catch (NullUserDataException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(
+            @RequestBody PasswordUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
+            @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
+        if (xUserRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
+        }
+        if (!ADMIN.equals(xUserRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
+        }
+        try {
+            adminService.updatePassword(Long.valueOf(xUserId), request);
+            return ResponseEntity.ok("Mot de passe modifié avec succès.");
+        } catch (NullUserDataException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadCreationFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

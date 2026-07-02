@@ -3,6 +3,7 @@ package com.financedomain.user.service;
 import com.financedomain.user.bean.Client;
 import com.financedomain.user.dto.AccountCreationRequest;
 import com.financedomain.user.dto.ClientRequest;
+import com.financedomain.user.dto.PasswordUpdateRequest;
 import com.financedomain.user.enums.TypeRole;
 import com.financedomain.user.exception.AccountAlreadyExistException;
 import com.financedomain.user.exception.BadCreationFormatException;
@@ -82,5 +83,21 @@ public class ClientService {
             throw new NullUserDataException("Client introuvable avec l'id : " + id);
         }
         clientRepository.deleteById(id);
+    }
+
+    @Caching(evict = {
+        @CacheEvict(value = "clients", key = "#id"),
+        @CacheEvict(value = "clientsByNumber", allEntries = true)
+    })
+    public void updatePassword(Long id, PasswordUpdateRequest request) {
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new NullUserDataException("Client introuvable avec l'id : " + id));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), client.getPassword())) {
+            throw new BadCreationFormatException("L'ancien mot de passe est incorrect.");
+        }
+
+        client.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        clientRepository.save(client);
     }
 }
