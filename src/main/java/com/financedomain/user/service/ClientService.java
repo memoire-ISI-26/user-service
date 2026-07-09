@@ -10,6 +10,8 @@ import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.proxy.WalletProxy;
 import com.financedomain.user.repository.ClientRepository;
+import com.financedomain.user.dto.TrackingEvent;
+import com.financedomain.user.proxy.TrackingProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,6 +33,9 @@ public class ClientService {
 
     @Autowired
     private WalletProxy walletProxy;
+
+    @Autowired
+    private TrackingProxy trackingProxy;
 
     public Client createClient(ClientRequest request) {
         if (clientRepository.existsByNumber(request.getNumber())) {
@@ -56,6 +61,9 @@ public class ClientService {
         } catch (BadCreationFormatException e) {
             throw new BadCreationFormatException("Échec de la création du compte portefeuille associé dans wallet-service : " + e.getMessage());
         }
+
+        // Tracking
+        sendTrackingEvent("REGISTER", savedClient.getNumber(), String.valueOf(savedClient.getId()), "CLIENT", "Inscription d'un nouveau client.");
 
         return savedClient;
     }
@@ -99,5 +107,25 @@ public class ClientService {
 
         client.setPassword(passwordEncoder.encode(request.getNewPassword()));
         clientRepository.save(client);
+
+        // Tracking
+        sendTrackingEvent("PASSWORD_UPDATE", client.getNumber(), String.valueOf(client.getId()), "CLIENT", "Changement de mot de passe client.");
+    }
+
+    private void sendTrackingEvent(String eventType, String msisdn, String userId, String userRole, Object payload) {
+        try {
+            TrackingEvent event = TrackingEvent.builder()
+                    .eventType(eventType)
+                    .msisdn(msisdn)
+                    .userId(userId)
+                    .userRole(userRole)
+                    .sourceService("user-service")
+                    .payload(payload)
+                    .timestamp(java.time.Instant.now())
+                    .build();
+            trackingProxy.collectEvent(event, "INTERNAL");
+        } catch (Exception e) {
+            System.err.println("Erreur de tracking client: " + e.getMessage());
+        }
     }
 }
