@@ -108,8 +108,6 @@ public class ClientService {
         client.setPassword(passwordEncoder.encode(request.getNewPassword()));
         clientRepository.save(client);
 
-        // Tracking
-        sendTrackingEvent("PASSWORD_UPDATE", client.getNumber(), String.valueOf(client.getId()), "CLIENT", "Changement de mot de passe client.");
     }
 
     private void sendTrackingEvent(String eventType, String msisdn, String userId, String userRole, Object payload) {

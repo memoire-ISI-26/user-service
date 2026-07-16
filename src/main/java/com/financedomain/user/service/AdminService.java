@@ -73,8 +73,6 @@ public class AdminService {
         admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
         adminRepository.save(admin);
 
-        // Tracking
-        sendTrackingEvent("PASSWORD_UPDATE", admin.getUsername(), String.valueOf(admin.getId()), "ADMINISTRATOR", "Changement de mot de passe administrateur.");
     }
 
     private void sendTrackingEvent(String eventType, String username, String userId, String userRole, Object payload) {
