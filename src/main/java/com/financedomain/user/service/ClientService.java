@@ -62,9 +62,6 @@ public class ClientService {
             throw new BadCreationFormatException("Échec de la création du compte portefeuille associé dans wallet-service : " + e.getMessage());
         }
 
-        // Tracking
-        sendTrackingEvent("REGISTER", savedClient.getNumber(), String.valueOf(savedClient.getId()), "CLIENT", "Inscription d'un nouveau client.");
-
         return savedClient;
     }
 
