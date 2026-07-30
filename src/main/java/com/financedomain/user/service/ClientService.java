@@ -12,6 +12,7 @@ import com.financedomain.user.proxy.WalletProxy;
 import com.financedomain.user.repository.ClientRepository;
 import com.financedomain.user.dto.TrackingEvent;
 import com.financedomain.user.proxy.TrackingProxy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ClientService {
 
@@ -120,7 +122,7 @@ public class ClientService {
                     .build();
             trackingProxy.collectEvent(event, "INTERNAL");
         } catch (Exception e) {
-            System.err.println("Erreur de tracking client: " + e.getMessage());
+            log.error("Erreur de tracking client: {}", e.getMessage(), e);
         }
     }
 }

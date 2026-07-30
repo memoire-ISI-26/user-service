@@ -9,6 +9,7 @@ import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.repository.AdminRepository;
 import com.financedomain.user.dto.TrackingEvent;
 import com.financedomain.user.proxy.TrackingProxy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class AdminService {
 
@@ -88,7 +90,7 @@ public class AdminService {
                     .build();
             trackingProxy.collectEvent(event, "INTERNAL");
         } catch (Exception e) {
-            System.err.println("Erreur de tracking admin: " + e.getMessage());
+            log.error("Erreur de tracking admin: {}", e.getMessage(), e);
         }
     }
 }
