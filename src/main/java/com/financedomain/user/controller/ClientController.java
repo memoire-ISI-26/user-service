@@ -4,6 +4,7 @@ import com.financedomain.user.bean.Client;
 import com.financedomain.user.dto.ApiResponse;
 import com.financedomain.user.dto.ClientRequest;
 import com.financedomain.user.dto.PasswordUpdateRequest;
+import com.financedomain.user.exception.AccountAlreadyExistException;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.service.ClientService;
@@ -41,8 +42,8 @@ public class ClientController {
             Client client = clientService.createClient(request);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponse<>(client, getPort()));
-        } catch (BadCreationFormatException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Le numméro saisi est déja utilisé" + e.getMessage());
+        } catch (BadCreationFormatException | AccountAlreadyExistException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Le numméro saisi est déja utilisé : " + e.getMessage());
         }
     }
 
