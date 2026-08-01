@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
 
+    private final static String ADMIN = "admin";
+
     @Autowired
     private AdminRepository adminRepository;
 
@@ -23,14 +25,14 @@ public class DatabaseInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("====== [Database Initializer] Vérification de l'existence des administrateurs ======");
         
-        if (!adminRepository.existsByUsername("admin")) {
+        if (!adminRepository.existsByUsername(ADMIN)) {
             log.info("[Database Initializer] Aucun administrateur par défaut trouvé. Création du compte 'admin'...");
             
             Admin admin = new Admin();
             admin.setFirstName("System");
             admin.setLastName("Administrator");
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
+            admin.setUsername(ADMIN);
+            admin.setPassword(passwordEncoder.encode(ADMIN));
             admin.setRole(TypeRole.ADMINISTRATOR);
             
             adminRepository.save(admin);
