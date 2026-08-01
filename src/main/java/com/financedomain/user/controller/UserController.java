@@ -20,7 +20,7 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<?> getAllUsers(
+    public ResponseEntity<Object> getAllUsers(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(
+    public ResponseEntity<Object> getUserById(
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {

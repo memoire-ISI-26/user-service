@@ -12,5 +12,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface WalletProxy {
 
     @PostMapping("/accounts")
-    ResponseEntity<?> createAccount(@RequestBody AccountCreationRequest request);
+    ResponseEntity<Object> createAccount(@RequestBody AccountCreationRequest request);
 }

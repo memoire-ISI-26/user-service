@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class WalletProxyFallback implements WalletProxy {
 
     @Override
-    public ResponseEntity<?> createAccount(AccountCreationRequest request) {
+    public ResponseEntity<Object> createAccount(AccountCreationRequest request) {
         log.warn("[Fallback] wallet-service est indisponible. Impossible d'ouvrir un portefeuille pour le numéro : {}", request.getNumber());
         throw new NotAvailableException("Le service financier (wallet-service) est actuellement indisponible. Veuillez réessayer plus tard.");
     }

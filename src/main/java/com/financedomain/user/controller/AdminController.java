@@ -25,7 +25,7 @@ public class AdminController {
     private AdminService adminService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> createAdmin(@RequestBody AdminRequest request) {
+    public ResponseEntity<Object> createAdmin(@RequestBody AdminRequest request) {
         try {
             Admin admin = adminService.createAdmin(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(admin);
@@ -35,7 +35,7 @@ public class AdminController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> getAllAdmins(
+    public ResponseEntity<Object> getAllAdmins(
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(UNAUTHORIZED);
@@ -47,7 +47,7 @@ public class AdminController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getAdminById(
+    public ResponseEntity<Object> getAdminById(
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
@@ -57,12 +57,12 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return adminService.getAdminById(id)
-                .map(ResponseEntity::ok)
+                .<ResponseEntity<Object>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<?> getAdminByUsername(
+    public ResponseEntity<Object> getAdminByUsername(
             @PathVariable String username,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
@@ -73,12 +73,12 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return adminService.getAdminByUsername(username)
-                .map(ResponseEntity::ok)
+                .<ResponseEntity<Object>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAdmin(
+    public ResponseEntity<Object> deleteAdmin(
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
         if (xUserRole == null) {
@@ -96,7 +96,7 @@ public class AdminController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<?> updatePassword(
+    public ResponseEntity<Object> updatePassword(
             @RequestBody PasswordUpdateRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {

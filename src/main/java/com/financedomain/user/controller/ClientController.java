@@ -36,7 +36,7 @@ public class ClientController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> createClient(@RequestBody ClientRequest request) {
+    public ResponseEntity<Object> createClient(@RequestBody ClientRequest request) {
         try {
             Client client = clientService.createClient(request);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -47,7 +47,7 @@ public class ClientController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> getAllClients(
+    public ResponseEntity<Object> getAllClients(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
@@ -62,7 +62,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getClientById(
+    public ResponseEntity<Object> getClientById(
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
@@ -74,7 +74,7 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientById(id)
-                .map(client -> {
+                .<ResponseEntity<Object>>map(client -> {
                     if (INTERNAL.equals(xUserRole)) {
                         return ResponseEntity.ok(client);
                     } else {
@@ -85,7 +85,7 @@ public class ClientController {
     }
 
     @GetMapping("/number/{number}")
-    public ResponseEntity<?> getClientByNumber(
+    public ResponseEntity<Object> getClientByNumber(
             @PathVariable String number,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
@@ -98,7 +98,7 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ACCESSDENIED);
         }
         return clientService.getClientByNumber(number)
-                .map(client -> {
+                .<ResponseEntity<Object>>map(client -> {
                     if (INTERNAL.equals(xUserRole)) {
                         return ResponseEntity.ok(client);
                     } else {
@@ -109,7 +109,7 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteClient(
+    public ResponseEntity<Object> deleteClient(
             @PathVariable Long id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Phone", required = false) String xUserPhone,
@@ -129,7 +129,7 @@ public class ClientController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<?> updatePassword(
+    public ResponseEntity<Object> updatePassword(
             @RequestBody PasswordUpdateRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "X-User-Role", required = false) String xUserRole) {
