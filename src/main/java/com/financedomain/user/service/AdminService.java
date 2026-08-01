@@ -7,8 +7,6 @@ import com.financedomain.user.enums.TypeRole;
 import com.financedomain.user.exception.BadCreationFormatException;
 import com.financedomain.user.exception.NullUserDataException;
 import com.financedomain.user.repository.AdminRepository;
-import com.financedomain.user.dto.TrackingEvent;
-import com.financedomain.user.proxy.TrackingProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,9 +24,6 @@ public class AdminService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private TrackingProxy trackingProxy;
 
     public Admin createAdmin(AdminRequest request) {
         if (adminRepository.existsByUsername(request.getUsername())) {
@@ -74,23 +69,5 @@ public class AdminService {
 
         admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
         adminRepository.save(admin);
-
-    }
-
-    private void sendTrackingEvent(String eventType, String username, String userId, String userRole, Object payload) {
-        try {
-            TrackingEvent event = TrackingEvent.builder()
-                    .eventType(eventType)
-                    .msisdn(username) // Use username as key identifier since admin has no phone msisdn in table
-                    .userId(userId)
-                    .userRole(userRole)
-                    .sourceService("user-service")
-                    .payload(payload)
-                    .timestamp(java.time.Instant.now())
-                    .build();
-            trackingProxy.collectEvent(event, "INTERNAL");
-        } catch (Exception e) {
-            log.error("Erreur de tracking admin: {}", e.getMessage(), e);
-        }
     }
 }
