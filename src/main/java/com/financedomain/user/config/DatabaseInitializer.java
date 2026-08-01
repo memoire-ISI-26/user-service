@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
 
-    private final static String ADMIN = "admin";
+    private static final String ADMIN = "admin";
 
     @Autowired
     private AdminRepository adminRepository;
